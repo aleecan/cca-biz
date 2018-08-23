@@ -37,6 +37,16 @@ spring:
             enabled: false # we use Webpack dev server + BrowserSync for livereload
     jackson:
         serialization.indent_output: true
+    cloud:
+            stream:
+                kafka:
+                    binder:
+                        brokers: localhost
+                        zk-nodes: localhost
+                bindings:
+                    articleInputChannel:
+                        destination: article_jhipster,article_jhipster2
+                        content-type: application/json
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
         url: jdbc:mysql://localhost:3306/biz?useUnicode=true&characterEncoding=utf8&useSSL=false
@@ -155,3 +165,7 @@ application:
     schemas:
         - jhipster
         - toto
+    topic-config:
+        article: article
+        bon-commande-created: bc_created
+        bon-commande-validated: bc_validated

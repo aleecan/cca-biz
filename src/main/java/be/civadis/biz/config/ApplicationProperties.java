@@ -14,6 +14,38 @@ import java.util.List;
 public class ApplicationProperties {
 
     private List<String> schemas;
+    private TopicConfig topicConfig;
+
+
+    public class TopicConfig{
+        private String article;
+        private String bonCommandeCreated;
+        private String bonCommandeValidated;
+
+        public String getArticle() {
+            return article;
+        }
+
+        public void setArticle(String article) {
+            this.article = article;
+        }
+
+        public String getBonCommandeCreated() {
+            return bonCommandeCreated;
+        }
+
+        public void setBonCommandeCreated(String bonCommandeCreated) {
+            this.bonCommandeCreated = bonCommandeCreated;
+        }
+
+        public String getBonCommandeValidated() {
+            return bonCommandeValidated;
+        }
+
+        public void setBonCommandeValidated(String bonCommandeValidated) {
+            this.bonCommandeValidated = bonCommandeValidated;
+        }
+    }
 
     //getters & setters
 
@@ -25,4 +57,11 @@ public class ApplicationProperties {
         this.schemas = schemas;
     }
 
+    public TopicConfig getTopicConfig() {
+        return topicConfig;
+    }
+
+    public void setTopicConfig(TopicConfig topicConfig) {
+        this.topicConfig = topicConfig;
+    }
 }
