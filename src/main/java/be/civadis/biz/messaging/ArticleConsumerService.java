@@ -24,11 +24,10 @@ public class ArticleConsumerService {
         log.info("Received article: {}.", article.getCode());
     }
 
-    /*
+
+    //doit être présent pour construire la table, elle sera ensuite matérialisée dans un statestore que l'on pourra interroger
     @StreamListener
     public void process(@Input(ArticleChannel.TABLE_CHANNEL) KTable allArticle) {
-        //System.out.println("kStream ")
-        System.out.println("Queryable Store Name : " + allArticle.queryableStoreName());
     }
-*/
+
 }

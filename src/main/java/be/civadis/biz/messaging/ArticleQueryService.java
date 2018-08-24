@@ -1,6 +1,7 @@
 package be.civadis.biz.messaging;
 
 import be.civadis.biz.config.ApplicationProperties;
+import be.civadis.biz.messaging.dto.ArticleDTO;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +23,13 @@ public class ArticleQueryService {
 
     public void printAll(){
 
-        ReadOnlyKeyValueStore<Object, Object> keyValueStore =
+        ReadOnlyKeyValueStore<String, byte[]> keyValueStore =
             queryableStoreRegistry.getQueryableStoreType(
                 ArticleChannel.ARTICLE_STATE_STORE,  //TODO: Comment filtrer par tenant ???
                 QueryableStoreTypes.keyValueStore());
 
-        keyValueStore.all().forEachRemaining(it -> System.out.println(it.value)); //TODO : prob. de conversion
+        keyValueStore.all().forEachRemaining(it -> System.out.println(new String(it.value)));
+        //TODO : compléter la config pour serial / deserial auto
 
     }
 
