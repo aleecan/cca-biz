@@ -45,7 +45,8 @@ spring:
                         zk-nodes: localhost
                     streams.bindings.allArticle:
                         consumer:
-                            materializedAs: article_table #comment filtrer par tenant au runtime ?
+                            materializedAs: article_table #crée un state store sur lequel on peut faire des queries
+                            #comment filtrer par tenant au runtime ?
                 bindings:
                     articleInputChannel:
                         destination: article_jhipster,article_jhipster2
