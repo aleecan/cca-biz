@@ -14,8 +14,7 @@ import java.util.List;
 public class ApplicationProperties {
 
     private List<String> schemas;
-    private TopicConfig topicConfig;
-
+    private TopicConfig topicConfig = new TopicConfig();
 
     public class TopicConfig{
         private String article;

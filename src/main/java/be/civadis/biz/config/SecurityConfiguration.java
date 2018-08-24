@@ -43,12 +43,13 @@ public class SecurityConfiguration extends ResourceServerConfigurerAdapter {
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
             .authorizeRequests()
+            .antMatchers("/test/**").permitAll()
             .antMatchers("/api/**").authenticated()
             .antMatchers("/management/health").permitAll()
             .antMatchers("/management/info").permitAll()
             .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN);
     }
-    
+
     /**
      * This OAuth2RestTemplate is only used by AuthorizationHeaderUtil that is currently used by TokenRelayRequestInterceptor
      */
@@ -57,5 +58,5 @@ public class SecurityConfiguration extends ResourceServerConfigurerAdapter {
         OAuth2ClientContext oAuth2ClientContext) {
         return new OAuth2RestTemplate(oAuth2ProtectedResourceDetails, oAuth2ClientContext);
     }
-    
+
 }

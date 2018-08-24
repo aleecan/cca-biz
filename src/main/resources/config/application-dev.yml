@@ -43,10 +43,17 @@ spring:
                     binder:
                         brokers: localhost
                         zk-nodes: localhost
+                    streams.bindings.allArticle:
+                        consumer:
+                            materializedAs: article_table #comment filtrer par tenant au runtime ?
                 bindings:
                     articleInputChannel:
                         destination: article_jhipster,article_jhipster2
                         content-type: application/json
+                    allArticle:
+                        destination: article_jhipster
+                        content-type: application/json
+
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
         url: jdbc:mysql://localhost:3306/biz?useUnicode=true&characterEncoding=utf8&useSSL=false
