@@ -8,13 +8,13 @@ public class ArticleDTO {
 
     public ArticleDTO() {
     }
-
+/*
     public ArticleDTO(Long id, String code, String libelle) {
         this.id = id;
         this.code = code;
         this.libelle = libelle;
     }
-
+*/
     public void setId(Long id) {
         this.id = id;
     }

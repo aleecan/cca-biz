@@ -1,40 +1,39 @@
 package be.civadis.biz.messaging;
 
-import be.civadis.biz.config.ApplicationProperties;
 import be.civadis.biz.messaging.dto.ArticleDTO;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.binder.kafka.streams.QueryableStoreRegistry;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 //import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
 
 @Service
-public class ArticleQueryService {
-
-    @Autowired
-    private QueryableStoreRegistry queryableStoreRegistry;
-
-    @Autowired
-    private ApplicationProperties applicationProperties;
-
-    @Autowired
-    private ArticleConsumerService articleConsumerService;
+public class ArticleQueryService extends QueryService{
 
     public ArticleQueryService() {
     }
 
-    public void printAll(){
+    public void printAll() throws IOException {
 
-        ReadOnlyKeyValueStore<String, byte[]> keyValueStore =
-            queryableStoreRegistry.getQueryableStoreType(
-                ArticleChannel.ARTICLE_STATE_STORE,  //TODO: Comment filtrer par tenant ???
-                QueryableStoreTypes.keyValueStore());
+        ReadOnlyKeyValueStore<String, String> keyValueStore = getStore(ArticleChannel.ARTICLE_STATE_STORE);
 
-        keyValueStore.all().forEachRemaining(it -> System.out.println(new String(it.value)));
-        //TODO : compléter la config pour serial / deserial auto
-        
+        keyValueStore.all().forEachRemaining(it -> {
+            System.out.println(it.key);
+            System.out.println(it.value);
+            try {
+                ArticleDTO art = convert(it.value, ArticleDTO.class);
+                System.out.println(art.getLibelle());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        //TODO : automatiser conversion json (bug version courante ???)
+        //TODO : voir comment filtrer par tenant
+        //TODO : filtre du store ?
+        // ou doit-on écrire un StreamListener qui maitient un store contenant ce que l'on veut pouvoir retrouver ?
+        //  et filtre en mémoire pour affiner
+
     }
 
 

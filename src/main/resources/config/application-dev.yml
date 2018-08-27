@@ -43,10 +43,24 @@ spring:
                     binder:
                         brokers: localhost
                         zk-nodes: localhost
-                    streams.bindings.allArticle:
-                        consumer:
-                            materializedAs: article_table #crée un state store sur lequel on peut faire des queries
-                            #comment filtrer par tenant au runtime ?
+
+                    streams:
+                        binder:
+                            brokers: localhost
+                            zk-nodes: localhost
+                            configuration:
+                                default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+                                default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+
+                        bindings.allArticle:
+                            consumer:
+                                #comment filtrer par tenant au runtime ?
+                                materializedAs: article_table #crée un state store sur lequel on peut faire des queries
+                                keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
+                                value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+                                #valueSerde: org.springframework.kafka.support.serializer.JsonSerde
+                                useNativeDecoding: true
+
                 bindings:
                     articleInputChannel:
                         destination: article_jhipster,article_jhipster2

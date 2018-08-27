@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 /**
  * REST controller for managing Department.
  */
@@ -24,7 +26,7 @@ public class TestResource {
 
     @GetMapping("/articles")
     @Timed
-    public ResponseEntity getAllArtilces() {
+    public ResponseEntity getAllArtilces() throws IOException {
         this.articleQueryService.printAll();
         return ResponseEntity.ok(true);
     }
