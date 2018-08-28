@@ -1,16 +1,36 @@
 package be.civadis.biz.messaging;
 
 import be.civadis.biz.messaging.dto.ArticleDTO;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.utils.Bytes;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.binder.ConsumerProperties;
+import org.springframework.cloud.stream.config.BindingProperties;
+import org.springframework.cloud.stream.messaging.Sink;
+import org.springframework.cloud.stream.messaging.Source;
+import org.springframework.kafka.core.StreamsBuilderFactoryBean;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 //import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
 
 @Service
 public class ArticleQueryService extends QueryService{
+
+    @Autowired
+    private StreamsBuilderFactoryBean streamsBuilderFactoryBean;
+
 
     public ArticleQueryService() {
     }
@@ -52,6 +72,30 @@ public class ArticleQueryService extends QueryService{
             }
         });
         return list;
+    }
+
+    //TODO : voir comment lancer foo au start du service
+    /**
+     * Create a {@link SubscribableChannel} and register in the
+     * {@link org.springframework.context.ApplicationContext}
+     */
+    private void foo() {
+        //TODO: compléter/corriger params
+        Properties config = new Properties();
+        config.put(StreamsConfig.APPLICATION_ID_CONFIG, "wordcount-application");
+        config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka-broker1:9092");
+        config.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+
+        //TODO iter chaque tenant pour créer leur store
+
+        StreamsBuilder builder = new StreamsBuilder();
+        KTable<String, ArticleDTO> articlesTable = builder.table("article_jhipster", Materialized.as("article_table_jhipster"));
+
+
+        KafkaStreams streams = new KafkaStreams(builder.build(), config);
+        streams.start();
+
     }
 
 }
