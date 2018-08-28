@@ -5,6 +5,8 @@ import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 //import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
 
 @Service
@@ -39,5 +41,17 @@ public class ArticleQueryService extends QueryService{
 
     }
 
+    public List<ArticleDTO> findAll(){
+        List<ArticleDTO> list = new ArrayList<>();
+        ReadOnlyKeyValueStore<String, String> keyValueStore = getStore(ArticleChannel.ARTICLE_STATE_STORE);
+        keyValueStore.all().forEachRemaining(it -> {
+            try {
+                list.add(convert(it.value, ArticleDTO.class));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        return list;
+    }
 
 }

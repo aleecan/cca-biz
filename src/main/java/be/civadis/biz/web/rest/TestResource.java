@@ -1,6 +1,7 @@
 package be.civadis.biz.web.rest;
 
 import be.civadis.biz.messaging.ArticleQueryService;
+import be.civadis.biz.messaging.dto.ArticleDTO;
 import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * REST controller for managing Department.
@@ -26,9 +28,8 @@ public class TestResource {
 
     @GetMapping("/articles")
     @Timed
-    public ResponseEntity getAllArtilces() throws IOException {
-        this.articleQueryService.printAll();
-        return ResponseEntity.ok(true);
+    public ResponseEntity<List<ArticleDTO>> getAllArticles() {
+        return ResponseEntity.ok(this.articleQueryService.findAll());
     }
 
 
