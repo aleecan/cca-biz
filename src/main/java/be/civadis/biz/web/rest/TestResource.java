@@ -29,7 +29,19 @@ public class TestResource {
     @GetMapping("/articles")
     @Timed
     public ResponseEntity<List<ArticleDTO>> getAllArticles() {
+        try {
+            Thread.sleep(100L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return ResponseEntity.ok(this.articleQueryService.findAll());
+    }
+
+    @GetMapping("/init")
+    @Timed
+    public ResponseEntity<Boolean> init() {
+        this.articleQueryService.prepareStore();
+        return ResponseEntity.ok(true);
     }
 
 

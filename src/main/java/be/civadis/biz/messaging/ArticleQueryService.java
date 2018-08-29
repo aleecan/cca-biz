@@ -3,36 +3,36 @@ package be.civadis.biz.messaging;
 import be.civadis.biz.messaging.dto.ArticleDTO;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
+import org.apache.kafka.streams.Consumed;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.binder.ConsumerProperties;
-import org.springframework.cloud.stream.config.BindingProperties;
-import org.springframework.cloud.stream.messaging.Sink;
-import org.springframework.cloud.stream.messaging.Source;
-import org.springframework.kafka.core.StreamsBuilderFactoryBean;
+import org.springframework.cloud.stream.binder.kafka.streams.properties.KafkaStreamsBinderConfigurationProperties;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 //import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
 
 @Service
 public class ArticleQueryService extends QueryService{
 
 
+    //private QueryableStoreProvider queryableStoreProvider;
+    @Autowired
+    private KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties ;
+
     public ArticleQueryService() {
     }
 
     public void printAll() throws IOException {
+
 
         ReadOnlyKeyValueStore<String, String> keyValueStore = getStore(ArticleChannel.ARTICLE_STATE_STORE);
 
@@ -60,7 +60,7 @@ public class ArticleQueryService extends QueryService{
 
     public List<ArticleDTO> findAll(){
         List<ArticleDTO> list = new ArrayList<>();
-        ReadOnlyKeyValueStore<String, String> keyValueStore = getStore(ArticleChannel.ARTICLE_STATE_STORE);
+        ReadOnlyKeyValueStore<String, String> keyValueStore = getStore("t4_store_article_jhipster"); //ArticleChannel.ARTICLE_STATE_STORE
         keyValueStore.all().forEachRemaining(it -> {
             try {
                 list.add(convert(it.value, ArticleDTO.class));
@@ -76,22 +76,47 @@ public class ArticleQueryService extends QueryService{
      * Create a {@link SubscribableChannel} and register in the
      * {@link org.springframework.context.ApplicationContext}
      */
-    private void foo() {
-        //TODO: compléter/corriger params
+    public void prepareStore() {
+
+
+
+
+        //TODO: compléter/corriger params, extraire de la config yml
         Properties config = new Properties();
-        config.put(StreamsConfig.APPLICATION_ID_CONFIG, "wordcount-application");
-        config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka-broker1:9092");
+        config.put(StreamsConfig.APPLICATION_ID_CONFIG, kafkaStreamsBinderConfigurationProperties.getApplicationId());
+        config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         config.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 
         //TODO iter chaque tenant pour créer leur store
 
         StreamsBuilder builder = new StreamsBuilder();
-        KTable<String, ArticleDTO> articlesTable = builder.table("article_jhipster", Materialized.as("article_table_jhipster"));
 
+        KTable<String, String> articlesTable = builder.table("article_jhipster",
+            Consumed.with(Serdes.String(), Serdes.String()),
+            Materialized.<String, String, KeyValueStore<Bytes, byte[]>>as("t5_store_article_jhipster"));
+
+
+        System.out.println("Store name " + articlesTable.queryableStoreName());
 
         KafkaStreams streams = new KafkaStreams(builder.build(), config);
+        streams.cleanUp();
         streams.start();
+
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ReadOnlyKeyValueStore<String, String> localStore = streams.store(articlesTable.queryableStoreName(), QueryableStoreTypes.<String, String>keyValueStore());
+        localStore.all().forEachRemaining(it -> {
+            try {
+                System.out.println(convert(it.value, ArticleDTO.class).getLibelle());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
 
     }
 

@@ -41,11 +41,13 @@ spring:
             stream:
                 kafka:
                     binder:
+                        applicationId: biz-service
                         brokers: localhost
                         zk-nodes: localhost
 
                     streams:
                         binder:
+                            applicationId: biz-service
                             brokers: localhost
                             zk-nodes: localhost
                             configuration:
