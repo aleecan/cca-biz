@@ -60,7 +60,7 @@ public class ArticleQueryService extends QueryService{
 
     public List<ArticleDTO> findAll(){
         List<ArticleDTO> list = new ArrayList<>();
-        ReadOnlyKeyValueStore<String, String> keyValueStore = getStore("t4_store_article_jhipster"); //ArticleChannel.ARTICLE_STATE_STORE
+        ReadOnlyKeyValueStore<String, String> keyValueStore = getStore(ArticleChannel.ARTICLE_STATE_STORE); //ArticleChannel.ARTICLE_STATE_STORE
         keyValueStore.all().forEachRemaining(it -> {
             try {
                 list.add(convert(it.value, ArticleDTO.class));
