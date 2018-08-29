@@ -28,6 +28,7 @@ public class ArticleConsumerService {
     //doit être présent pour construire la table, elle sera ensuite matérialisée dans un statestore que l'on pourra interroger
     @StreamListener
     public void process(@Input(ArticleChannel.TABLE_CHANNEL) KTable allArticle) {
+
     }
 
 }

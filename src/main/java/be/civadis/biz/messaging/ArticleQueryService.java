@@ -28,9 +28,6 @@ import java.util.Properties;
 @Service
 public class ArticleQueryService extends QueryService{
 
-    @Autowired
-    private StreamsBuilderFactoryBean streamsBuilderFactoryBean;
-
 
     public ArticleQueryService() {
     }
