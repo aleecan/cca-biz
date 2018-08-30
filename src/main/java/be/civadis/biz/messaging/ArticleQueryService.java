@@ -1,13 +1,13 @@
 package be.civadis.biz.messaging;
 
 import be.civadis.biz.messaging.dto.ArticleDTO;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.Consumed;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.processor.StateStoreSupplier;
+import org.apache.kafka.streams.processor.StreamPartitioner;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.cloud.stream.binder.*;
+import org.springframework.cloud.stream.binder.kafka.streams.KTableBinderConfiguration;
 import org.springframework.cloud.stream.binder.kafka.streams.properties.KafkaStreamsBinderConfigurationProperties;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.binding.BindingTargetFactory;
@@ -171,7 +172,7 @@ public class ArticleQueryService extends QueryService{
         });
 
         //test du binding
-        // --> MessageHandler ok, mais store pas retrouvé !
+        // --> MessageHandler ok, mais store pas retrouvé, comme si l'ajout avait été fait dans un KafkaStream différent !
         ReadOnlyKeyValueStore<String, String> keyValueStore = queryableStoreRegistry.getQueryableStoreType(
             "article_table_jhipster",
             QueryableStoreTypes.keyValueStore());
