@@ -11,22 +11,44 @@ import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.cloud.stream.binder.*;
 import org.springframework.cloud.stream.binder.kafka.streams.properties.KafkaStreamsBinderConfigurationProperties;
+import org.springframework.cloud.stream.binding.BindingService;
+import org.springframework.cloud.stream.binding.BindingTargetFactory;
+import org.springframework.cloud.stream.config.BindingProperties;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Service;
 
+import org.springframework.cloud.stream.binder.kafka.streams.properties.KafkaStreamsConsumerProperties;
+
 import java.io.IOException;
 import java.util.*;
-//import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
 
 @Service
 public class ArticleQueryService extends QueryService{
 
-
-    //private QueryableStoreProvider queryableStoreProvider;
     @Autowired
     private KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties ;
+
+    @Autowired
+    private BindingServiceProperties bindingServiceProperties;
+    @Autowired
+    private ConfigurableBeanFactory beanFactory;
+    @Autowired
+    private BindingService bindingService;
+    @Autowired @Qualifier("channelFactory")
+    private BindingTargetFactory bindingTargetFactory;
+    @Autowired
+    private BinderFactory binderFactory;
 
     public ArticleQueryService() {
     }
@@ -54,11 +76,15 @@ public class ArticleQueryService extends QueryService{
         //  puis filtre en mémoire pour affiner
         // ex: https://github.com/spring-cloud/spring-cloud-stream-samples/tree/master/kafka-streams-samples/kafka-streams-interactive-query-advanced/src/main/java/kafka/streams/interactive/query
         //pas encore d'appel direct de KSQL possible, on doit passer par un appel rest à des ressources du server KSQL qui se connecte au topics
-        //TODO : attention, si N partitions, on ne récupère qu'une partie des evrnts ! (Besoin de plusieurs appels, ou util de table globale)
+        //TODO : attention, si N partitions, on ne récupère qu'une partie des events ! (Besoin de plusieurs appels, ou util de table globale)
 
     }
 
     public List<ArticleDTO> findAll(){
+
+
+        //KafkaStreams. allMetadataForStore(String storeName): find those applications instances that manage local instances of the state store “storeName”
+
         List<ArticleDTO> list = new ArrayList<>();
         ReadOnlyKeyValueStore<String, String> keyValueStore = getStore(ArticleChannel.ARTICLE_STATE_STORE); //ArticleChannel.ARTICLE_STATE_STORE
         keyValueStore.all().forEachRemaining(it -> {
@@ -77,10 +103,7 @@ public class ArticleQueryService extends QueryService{
      * {@link org.springframework.context.ApplicationContext}
      */
     public void prepareStore() {
-
-
-
-
+/*
         //TODO: compléter/corriger params, extraire de la config yml
         Properties config = new Properties();
         config.put(StreamsConfig.APPLICATION_ID_CONFIG, kafkaStreamsBinderConfigurationProperties.getApplicationId());
@@ -94,13 +117,11 @@ public class ArticleQueryService extends QueryService{
 
         KTable<String, String> articlesTable = builder.table("article_jhipster",
             Consumed.with(Serdes.String(), Serdes.String()),
-            Materialized.<String, String, KeyValueStore<Bytes, byte[]>>as("t5_store_article_jhipster"));
-
-
-        System.out.println("Store name " + articlesTable.queryableStoreName());
+            Materialized.<String, String, KeyValueStore<Bytes, byte[]>>as("t6_store_article_jhipster"));
 
         KafkaStreams streams = new KafkaStreams(builder.build(), config);
-        streams.cleanUp();
+
+        //streams.cleanUp();
         streams.start();
 
         try {
@@ -117,6 +138,54 @@ public class ArticleQueryService extends QueryService{
                 e.printStackTrace();
             }
         });
+*/
+
+        /////////////////////
+
+        //compléter proprios des bindings avec novueau binding
+        BindingProperties bindingProperties = new BindingProperties();
+        bindingProperties.setDestination("article_jhipster");
+        bindingProperties.setContentType("application/json");
+        bindingServiceProperties.getBindings().put("allArticleJhipster", bindingProperties); //consumerName
+
+        SubscribableChannel channel = (SubscribableChannel)bindingTargetFactory.createInput("allArticleJhipster");
+
+        //beanFactory.registerSingleton("allArticleJhipster", channel);
+        //channel = (SubscribableChannel)beanFactory.initializeBean(channel, "allArticleJhipster");
+        //bindingService.bindConsumer(channel, "allArticleJhipster");
+
+        //créer prop à transmettre, avec infos du materializedAs pour créer le store
+        Binder binder = binderFactory.getBinder(this.bindingServiceProperties.getBinder("allArticleJhipster"), channel.getClass());
+        KafkaStreamsConsumerProperties cons = new KafkaStreamsConsumerProperties();
+        cons.setKeySerde("org.apache.kafka.common.serialization.Serdes$StringSerde");
+        cons.setValueSerde("org.apache.kafka.common.serialization.Serdes$StringSerde");
+        cons.setMaterializedAs("article_table_jhipster");
+        ExtendedConsumerProperties prop = new ExtendedConsumerProperties(cons);
+
+        //créer le novueau binding
+        Binding binding = bindingService.doBindConsumer(channel, "allArticleJhipster", binder, prop, "article_jhipster");
+
+        //ajouter un message handler
+        channel.subscribe(message -> {
+            System.out.println("Received message in generic handler : " + message.getPayload().toString());
+        });
+
+        //test du binding
+        // --> MessageHandler ok, mais store pas retrouvé !
+        ReadOnlyKeyValueStore<String, String> keyValueStore = queryableStoreRegistry.getQueryableStoreType(
+            "article_table_jhipster",
+            QueryableStoreTypes.keyValueStore());
+
+        keyValueStore.all().forEachRemaining(it -> {
+            try {
+                System.out.println(convert(it.value, ArticleDTO.class).getLibelle());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        //KTable table = (KTable)bindingTargetFactory.createInput("allArticleJhipster");
+        //System.out.println(table.queryableStoreName());
 
     }
 

@@ -12,7 +12,7 @@ import java.io.IOException;
 public class QueryService {
 
     @Autowired
-    private QueryableStoreRegistry queryableStoreRegistry;
+    protected QueryableStoreRegistry queryableStoreRegistry;
 
     @Autowired
     private ApplicationProperties applicationProperties;
