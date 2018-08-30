@@ -162,6 +162,8 @@ public class ArticleQueryService extends QueryService{
         cons.setValueSerde("org.apache.kafka.common.serialization.Serdes$StringSerde");
         cons.setMaterializedAs("article_table_jhipster");
         ExtendedConsumerProperties prop = new ExtendedConsumerProperties(cons);
+        prop.setUseNativeDecoding(true);
+
 
         //créer le novueau binding
         Binding binding = bindingService.doBindConsumer(channel, "allArticleJhipster", binder, prop, "article_jhipster");
