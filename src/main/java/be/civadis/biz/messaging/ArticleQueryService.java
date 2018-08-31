@@ -153,6 +153,8 @@ public class ArticleQueryService extends QueryService{
 
         //TODO : tester arret et redémarrage du service, on doit retrouver les infos sans devoir reproduire dans le topics
 
+        //TODO: voir si on peut faire un register de l'objet Streams dans queryableStoreRegistry pour afin de ne pas devoir mémoriser le kafkaStreams dans la ressource
+
         /////////////////////
         //recup le kafkaStreams de Spring, mais on ne peut plus le modifier
         /*
