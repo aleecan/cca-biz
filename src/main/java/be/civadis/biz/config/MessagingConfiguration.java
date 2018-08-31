@@ -2,7 +2,6 @@ package be.civadis.biz.config;
 
 import be.civadis.biz.messaging.ArticleChannel;
 import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.binder.kafka.streams.annotations.KafkaStreamsProcessor;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.annotation.InboundChannelAdapter;
@@ -35,4 +34,5 @@ public class MessagingConfiguration {
         return () -> new GenericMessage<>("Test message from JHipster sent at " +
             new SimpleDateFormat().format(new Date()));
     }
+
 }

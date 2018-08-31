@@ -39,7 +39,7 @@ public class TestResource {
 
     @GetMapping("/init")
     @Timed
-    public ResponseEntity<Boolean> init() {
+    public ResponseEntity<Boolean> init() throws Exception {
         this.articleQueryService.prepareStore();
         return ResponseEntity.ok(true);
     }

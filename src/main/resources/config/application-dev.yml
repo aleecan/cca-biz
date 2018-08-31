@@ -54,14 +54,14 @@ spring:
                                 default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
                                 default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
 
-                        bindings.allArticle:
-                            consumer:
-                                #comment filtrer par tenant au runtime ?
-                                materializedAs: article_table #crée un state store sur lequel on peut faire des queries
-                                keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
-                                value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-                                #valueSerde: org.springframework.kafka.support.serializer.JsonSerde
-                                useNativeDecoding: true
+                        #bindings.allArticle:
+                        #    consumer:
+                        #        #comment filtrer par tenant au runtime ? -> création par code des store
+                        #        materializedAs: article_table #crée un state store sur lequel on peut faire des queries
+                        #        keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
+                        #        value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+                        #        #valueSerde: org.springframework.kafka.support.serializer.JsonSerde
+                        #        useNativeDecoding: true
 
                 bindings:
                     articleInputChannel:
