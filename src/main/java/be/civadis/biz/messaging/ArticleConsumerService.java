@@ -16,6 +16,7 @@ public class ArticleConsumerService {
 
     /**
      * ecoute sur le channel des articles, ce channel peut être associé à plusieurs topics (voir config)
+     * va permettre de mettre à jour les articles présent dans la db bonCommande
      *
      * @param article
      */

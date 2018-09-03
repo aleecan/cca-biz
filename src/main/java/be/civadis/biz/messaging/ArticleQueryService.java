@@ -34,6 +34,12 @@ public class ArticleQueryService extends QueryService{
     public ArticleQueryService() {
     }
 
+    /**
+     * Défini une topologie de streams et exécute celle-ci dans une instance de KafkaStreams
+     * Pour chaque tenant récupérer de la config,
+     *  -> crée une ktable alimentées par le topic des articles du tenant
+     *  -> expose cette ktable dans un state store accessible à la demande par query rest
+     */
     @PostConstruct
     public void init() {
 
@@ -69,6 +75,10 @@ public class ArticleQueryService extends QueryService{
 
     }
 
+    /**
+     * Recherche les articles à partir du state store des articles du tenant courant
+     * @return
+     */
     public List<ArticleDTO> findAll(){
 
         List<ArticleDTO> list = new ArrayList<>();
@@ -91,21 +101,6 @@ public class ArticleQueryService extends QueryService{
 
     ////////////// divers essai...
 
-    public void printAll() throws IOException {
-
-
-        ReadOnlyKeyValueStore<String, String> keyValueStore = getStore(ArticleChannel.ARTICLE_STATE_STORE);
-
-        keyValueStore.all().forEachRemaining(it -> {
-            System.out.println(it.key);
-            System.out.println(it.value);
-            try {
-                ArticleDTO art = convert(it.value, ArticleDTO.class);
-                System.out.println(art.getLibelle());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
 
         // on doit écrire un StreamListener qui maintient un store contenant ce que l'on veut pouvoir retrouver, afin d'éviter de rapatrier trop de données vers le client
         //  puis filtre en mémoire pour affiner
@@ -113,7 +108,6 @@ public class ArticleQueryService extends QueryService{
         //pas encore d'appel direct de KSQL possible, on doit passer par un appel rest à des ressources du server KSQL qui se connecte au topics
         //attention, si N partitions, on ne récupère qu'une partie des events ! (Besoin de plusieurs appels, ou util de table globale)
 
-    }
 
     public void prepareStore() throws Exception {
 
