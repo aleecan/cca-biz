@@ -1,4 +1,4 @@
-package be.civadis.biz.messaging;
+package be.civadis.biz.messaging.streaming;
 
 import be.civadis.biz.config.ApplicationProperties;
 import org.apache.kafka.streams.state.QueryableStoreTypes;

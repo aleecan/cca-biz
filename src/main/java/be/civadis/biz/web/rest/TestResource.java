@@ -1,16 +1,14 @@
 package be.civadis.biz.web.rest;
 
-import be.civadis.biz.messaging.ArticleQueryService;
+import be.civadis.biz.messaging.streaming.ArticleQueryService;
 import be.civadis.biz.messaging.dto.ArticleDTO;
 import be.civadis.biz.multitenancy.TenantContext;
-import be.civadis.biz.multitenancy.TenantUtils;
 import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 
 /**

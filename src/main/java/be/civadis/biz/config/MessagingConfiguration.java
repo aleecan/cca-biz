@@ -1,6 +1,6 @@
 package be.civadis.biz.config;
 
-import be.civadis.biz.messaging.ArticleChannel;
+import be.civadis.biz.messaging.streaming.ArticleChannel;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.context.annotation.Bean;

@@ -1,4 +1,4 @@
-package be.civadis.biz.messaging;
+package be.civadis.biz.messaging.streaming;
 
 import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.messaging.SubscribableChannel;

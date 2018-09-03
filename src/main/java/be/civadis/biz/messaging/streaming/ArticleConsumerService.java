@@ -1,11 +1,8 @@
-package be.civadis.biz.messaging;
+package be.civadis.biz.messaging.streaming;
 
 import be.civadis.biz.messaging.dto.ArticleDTO;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.stereotype.Service;
 

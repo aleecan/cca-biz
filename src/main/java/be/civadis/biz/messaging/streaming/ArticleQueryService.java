@@ -1,8 +1,7 @@
-package be.civadis.biz.messaging;
+package be.civadis.biz.messaging.streaming;
 
 import be.civadis.biz.config.ApplicationProperties;
 import be.civadis.biz.messaging.dto.ArticleDTO;
-import be.civadis.biz.multitenancy.TenantUtils;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
@@ -11,7 +10,6 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.binder.kafka.properties.KafkaBinderConfigurationProperties;
 import org.springframework.cloud.stream.binder.kafka.streams.properties.KafkaStreamsBinderConfigurationProperties;
 import org.springframework.stereotype.Service;
 
