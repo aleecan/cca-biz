@@ -67,9 +67,9 @@ spring:
                     articleInputChannel:
                         destination: article_jhipster,article_jhipster2
                         content-type: application/json
-                    allArticle:
-                        destination: article_jhipster
-                        content-type: application/json
+                    #allArticle:
+                    #    destination: article_jhipster
+                    #    content-type: application/json
 
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
@@ -188,7 +188,7 @@ jhipster:
 application:
     schemas:
         - jhipster
-        - toto
+        - jhipster2
     topic-config:
         article: article
         bon-commande-created: bc_created

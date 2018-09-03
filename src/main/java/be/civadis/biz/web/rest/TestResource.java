@@ -2,6 +2,8 @@ package be.civadis.biz.web.rest;
 
 import be.civadis.biz.messaging.ArticleQueryService;
 import be.civadis.biz.messaging.dto.ArticleDTO;
+import be.civadis.biz.multitenancy.TenantContext;
+import be.civadis.biz.multitenancy.TenantUtils;
 import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,14 +28,11 @@ public class TestResource {
         this.articleQueryService = articleQueryService;
     }
 
-    @GetMapping("/articles")
+    //TODO : Utiliser le tenant du token
+    @GetMapping("/articles/{tenant}")
     @Timed
-    public ResponseEntity<List<ArticleDTO>> getAllArticles() {
-        try {
-            Thread.sleep(100L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public ResponseEntity<List<ArticleDTO>> getAllArticles(@PathVariable(value = "tenant") String tenant) {
+        TenantContext.setCurrentTenant(tenant);
         return ResponseEntity.ok(this.articleQueryService.findAll());
     }
 

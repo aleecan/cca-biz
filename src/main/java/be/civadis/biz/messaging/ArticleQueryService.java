@@ -1,66 +1,95 @@
 package be.civadis.biz.messaging;
 
+import be.civadis.biz.config.ApplicationProperties;
 import be.civadis.biz.messaging.dto.ArticleDTO;
-import org.apache.kafka.common.serialization.Serde;
+import be.civadis.biz.multitenancy.TenantUtils;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.processor.StateStoreSupplier;
-import org.apache.kafka.streams.processor.StreamPartitioner;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.cloud.stream.binder.*;
-import org.springframework.cloud.stream.binder.kafka.streams.KTableBinderConfiguration;
+import org.springframework.cloud.stream.binder.kafka.properties.KafkaBinderConfigurationProperties;
 import org.springframework.cloud.stream.binder.kafka.streams.properties.KafkaStreamsBinderConfigurationProperties;
-import org.springframework.cloud.stream.binding.BindingService;
-import org.springframework.cloud.stream.binding.BindingTargetFactory;
-import org.springframework.cloud.stream.config.BindingProperties;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.context.ApplicationContext;
-import org.springframework.kafka.core.StreamsBuilderFactoryBean;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Service;
 
-import org.springframework.cloud.stream.binder.kafka.streams.properties.KafkaStreamsConsumerProperties;
-
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 @Service
 public class ArticleQueryService extends QueryService{
 
     @Autowired
+    private ApplicationProperties applicationProperties;
+
+    @Autowired
     private KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties ;
-
-    @Autowired
-    private BindingServiceProperties bindingServiceProperties;
-    @Autowired
-    private ConfigurableBeanFactory beanFactory;
-    @Autowired
-    private BindingService bindingService;
-    @Autowired @Qualifier("channelFactory") //@Qualifier("kTableBoundElementFactory")
-    private BindingTargetFactory bindingTargetFactory;
-    @Autowired
-    private BinderFactory binderFactory;
-
-    @Autowired
-    private ApplicationContext applicationContext;
-    //private StreamsBuilderFactoryBean streamsBuilderFactoryBean;
 
     private KafkaStreams streams;
 
     public ArticleQueryService() {
     }
+
+    @PostConstruct
+    public void init() {
+
+        //recup params du fichier de config
+        String appId = kafkaStreamsBinderConfigurationProperties.getApplicationId();
+        String[] brokers = kafkaStreamsBinderConfigurationProperties.getBrokers();
+        StringBuilder brokersStr = new StringBuilder();
+        for (int i=0; i < brokers.length; i++){
+            if (i > 0) brokersStr.append(",");
+            brokersStr.append(brokers[i]);
+            brokersStr.append(":9092"); //TODO
+        }
+
+        Properties config = new Properties();
+        config.put(StreamsConfig.APPLICATION_ID_CONFIG, appId);
+        config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, brokersStr.toString());
+        config.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+
+        StreamsBuilder builder = new StreamsBuilder();
+
+        //iter chaque tenant pour créer leur store dans la topology
+        applicationProperties.getSchemas().stream().forEach(tenant -> {
+            builder.globalTable(TopicTools.resolveTopicName(applicationProperties.getTopicConfig().getArticle(), tenant),
+                Consumed.with(Serdes.String(), Serdes.String()),
+                Materialized.<String, String, KeyValueStore<Bytes, byte[]>>as(TopicTools.resolveStoreName(applicationProperties.getTopicConfig().getArticle(), tenant)));
+        });
+
+        //créer et start kafkaStreams selon la topology définie
+        streams = new KafkaStreams(builder.build(), config);
+        //streams.cleanUp();
+        streams.start();
+
+    }
+
+    public List<ArticleDTO> findAll(){
+
+        List<ArticleDTO> list = new ArrayList<>();
+        ReadOnlyKeyValueStore<String, String> keyValueStore = streams.store(TopicTools.resolveStoreName(applicationProperties.getTopicConfig().getArticle()), QueryableStoreTypes.<String, String>keyValueStore());
+
+        keyValueStore.all().forEachRemaining(it -> {
+            try {
+                list.add(convert(it.value, ArticleDTO.class));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        return list;
+    }
+
+
+
+
+
+    ////////////// divers essai...
 
     public void printAll() throws IOException {
 
@@ -78,42 +107,15 @@ public class ArticleQueryService extends QueryService{
             }
         });
 
-        //TODO : automatiser conversion json (bug version courante ???)
-        //TODO : voir comment filtrer par tenant
-        //TODO : filtre du store ?
         // on doit écrire un StreamListener qui maintient un store contenant ce que l'on veut pouvoir retrouver, afin d'éviter de rapatrier trop de données vers le client
         //  puis filtre en mémoire pour affiner
         // ex: https://github.com/spring-cloud/spring-cloud-stream-samples/tree/master/kafka-streams-samples/kafka-streams-interactive-query-advanced/src/main/java/kafka/streams/interactive/query
         //pas encore d'appel direct de KSQL possible, on doit passer par un appel rest à des ressources du server KSQL qui se connecte au topics
-        //TODO : attention, si N partitions, on ne récupère qu'une partie des events ! (Besoin de plusieurs appels, ou util de table globale)
+        //attention, si N partitions, on ne récupère qu'une partie des events ! (Besoin de plusieurs appels, ou util de table globale)
 
     }
 
-    public List<ArticleDTO> findAll(){
-
-        //KafkaStreams. allMetadataForStore(String storeName): find those applications instances that manage local instances of the state store “storeName”
-
-        List<ArticleDTO> list = new ArrayList<>();
-        //ReadOnlyKeyValueStore<String, String> keyValueStore = getStore("t7_store_article_jhipster"); //ArticleChannel.ARTICLE_STATE_STORE
-        ReadOnlyKeyValueStore<String, String> keyValueStore = streams.store("store_article_jhipster", QueryableStoreTypes.<String, String>keyValueStore());
-
-        keyValueStore.all().forEachRemaining(it -> {
-            try {
-                list.add(convert(it.value, ArticleDTO.class));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-
-        return list;
-    }
-
-    //TODO : voir comment lancer foo au start du service
-    /**
-     * Create a {@link SubscribableChannel} and register in the
-     * {@link org.springframework.context.ApplicationContext}
-     */
-    public synchronized void prepareStore() throws Exception {
+    public void prepareStore() throws Exception {
 
         //TODO: compléter/corriger params, extraire de la config yml
         Properties config = new Properties();
@@ -150,8 +152,6 @@ public class ArticleQueryService extends QueryService{
                 e.printStackTrace();
             }
         });
-
-        //TODO : tester arret et redémarrage du service, on doit retrouver les infos sans devoir reproduire dans le topics
 
         //TODO: voir si on peut faire un register de l'objet Streams dans queryableStoreRegistry pour afin de ne pas devoir mémoriser le kafkaStreams dans la ressource
 

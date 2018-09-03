@@ -21,14 +21,15 @@ public class ArticleConsumerService {
      */
     @StreamListener(ArticleChannel.INPUT_CHANNEL)
     public void consume(ArticleDTO article) {
-        log.info("Received article: {}.", article.getCode());
+        log.info("Article reçu: {}.", article.getCode());
+        log.info("Update article si présent en DB bonCommande");
+        //TODO : appel service ou repo pour maj de l'article si nécessaire
     }
 
 
     //doit être présent pour construire la table, elle sera ensuite matérialisée dans un statestore que l'on pourra interroger
-    @StreamListener
-    public void allArticle(@Input(ArticleChannel.TABLE_CHANNEL) KTable allArticle) {
-
-    }
+    //@StreamListener
+    //public void allArticle(@Input(ArticleChannel.TABLE_CHANNEL) KTable allArticle) {
+    //}
 
 }
