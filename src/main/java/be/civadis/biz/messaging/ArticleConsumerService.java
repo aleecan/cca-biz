@@ -25,10 +25,4 @@ public class ArticleConsumerService {
         //TODO : appel service ou repo pour maj de l'article si nécessaire
     }
 
-
-    //doit être présent pour construire la table, elle sera ensuite matérialisée dans un statestore que l'on pourra interroger
-    //@StreamListener
-    //public void allArticle(@Input(ArticleChannel.TABLE_CHANNEL) KTable allArticle) {
-    //}
-
 }
