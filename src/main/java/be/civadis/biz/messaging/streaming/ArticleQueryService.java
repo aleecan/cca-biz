@@ -9,6 +9,8 @@ import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.binder.kafka.streams.properties.KafkaStreamsBinderConfigurationProperties;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,8 @@ public class ArticleQueryService extends QueryService{
     private KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties ;
 
     private KafkaStreams streams;
+
+    private final Logger log = LoggerFactory.getLogger(ArticleQueryService.class);
 
     public ArticleQueryService() {
     }
@@ -54,8 +58,9 @@ public class ArticleQueryService extends QueryService{
         Properties config = new Properties();
         config.put(StreamsConfig.APPLICATION_ID_CONFIG, appId);
         config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, brokersStr.toString());
-        config.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        config.putAll(kafkaStreamsBinderConfigurationProperties.getConfiguration());
+        //config.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        //config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 
         StreamsBuilder builder = new StreamsBuilder();
 
@@ -63,7 +68,7 @@ public class ArticleQueryService extends QueryService{
         applicationProperties.getSchemas().stream().forEach(tenant -> {
             builder.globalTable(TopicTools.resolveTopicName(applicationProperties.getTopicConfig().getArticle(), tenant),
                 Consumed.with(Serdes.String(), Serdes.String()),
-                Materialized.<String, String, KeyValueStore<Bytes, byte[]>>as(TopicTools.resolveStoreName(applicationProperties.getTopicConfig().getArticle(), tenant)));
+                Materialized.as(TopicTools.resolveStoreName(applicationProperties.getTopicConfig().getArticle(), tenant)));
         });
 
         //créer et start kafkaStreams selon la topology définie
@@ -71,6 +76,13 @@ public class ArticleQueryService extends QueryService{
         //streams.cleanUp();
         streams.start();
 
+        //log error
+        streams.setUncaughtExceptionHandler((Thread thread, Throwable throwable) -> {
+            log.error(throwable.getMessage(), throwable);
+        });
+
+        // Add shutdown hook to stop the Kafka Streams threads.
+        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
     }
 
     /**
@@ -92,10 +104,6 @@ public class ArticleQueryService extends QueryService{
 
         return list;
     }
-
-
-
-
 
     ////////////// divers essai...
 
