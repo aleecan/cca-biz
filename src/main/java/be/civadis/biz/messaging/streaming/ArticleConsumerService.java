@@ -20,6 +20,7 @@ public class ArticleConsumerService {
     @StreamListener(ArticleChannel.INPUT_CHANNEL)
     public void consume(ArticleDTO article) {
         log.info("Article reçu: {}, Update article si présent en DB bonCommande", article.getCode());
+        //TODO: identifier le tenant de l'article
         //TODO : appel service ou repo pour maj de l'article si nécessaire
     }
 
