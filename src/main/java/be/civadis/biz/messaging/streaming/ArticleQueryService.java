@@ -73,13 +73,14 @@ public class ArticleQueryService extends QueryService{
 
         //créer et start kafkaStreams selon la topology définie
         streams = new KafkaStreams(builder.build(), config);
-        //streams.cleanUp();
-        streams.start();
 
         //log error
         streams.setUncaughtExceptionHandler((Thread thread, Throwable throwable) -> {
             log.error(throwable.getMessage(), throwable);
         });
+
+        //streams.cleanUp();
+        streams.start();
 
         // Add shutdown hook to stop the Kafka Streams threads.
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
