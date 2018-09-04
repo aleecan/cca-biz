@@ -70,6 +70,7 @@ public class ArticleQueryService extends QueryService{
                 Consumed.with(Serdes.String(), Serdes.String()),
                 Materialized.as(TopicTools.resolveStoreName(applicationProperties.getTopicConfig().getArticle(), tenant)));
         });
+        //TODO : voir si le store par défault est persistent
 
         //créer et start kafkaStreams selon la topology définie
         streams = new KafkaStreams(builder.build(), config);
