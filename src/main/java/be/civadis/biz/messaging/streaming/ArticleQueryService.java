@@ -6,9 +6,7 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.KeyValueStore;
-import org.apache.kafka.streams.state.QueryableStoreTypes;
-import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,11 +64,12 @@ public class ArticleQueryService extends QueryService{
 
         //iter chaque tenant pour créer leur store dans la topology
         applicationProperties.getSchemas().stream().forEach(tenant -> {
+            KeyValueBytesStoreSupplier storeSupplier = Stores
+                .persistentKeyValueStore(TopicTools.resolveStoreName(applicationProperties.getTopicConfig().getArticle(), tenant));
             builder.globalTable(TopicTools.resolveTopicName(applicationProperties.getTopicConfig().getArticle(), tenant),
                 Consumed.with(Serdes.String(), Serdes.String()),
-                Materialized.as(TopicTools.resolveStoreName(applicationProperties.getTopicConfig().getArticle(), tenant)));
+                Materialized.as(storeSupplier));
         });
-        //TODO : voir si le store par défault est persistent
 
         //créer et start kafkaStreams selon la topology définie
         streams = new KafkaStreams(builder.build(), config);
@@ -125,6 +124,7 @@ public class ArticleQueryService extends QueryService{
         config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         config.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        //config.put(StreamsConfig.APPLICATION_SERVER_CONFIG, rpcEndpoint);
 
         //TODO iter chaque tenant pour créer leur store
 
