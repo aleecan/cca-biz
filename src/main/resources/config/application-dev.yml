@@ -37,6 +37,7 @@ spring:
             enabled: false # we use Webpack dev server + BrowserSync for livereload
     jackson:
         serialization.indent_output: true
+
     cloud:
             stream:
                 kafka:
