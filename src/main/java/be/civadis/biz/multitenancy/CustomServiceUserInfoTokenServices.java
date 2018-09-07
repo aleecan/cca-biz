@@ -1,5 +1,6 @@
 package be.civadis.biz.multitenancy;
 
+import be.civadis.biz.security.AuthoritiesConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
@@ -21,6 +22,7 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +93,23 @@ public class CustomServiceUserInfoTokenServices implements ResourceServerTokenSe
                 this.logger.debug("userinfo returned error: " + map.get("error"));
             }
             throw new InvalidTokenException(accessToken);
+
         } else {
+
+            //rechercher les roles
+            List roles = null;
+            if (map.containsKey("roles") && map.get("roles") != null){
+                roles = (List) map.get("roles");
+            } else {
+                roles = new ArrayList<String>();
+                map.put("roles", roles);
+            }
+
+            //ajouter le role SERVICE_WF_CLIENT
+            roles.add(AuthoritiesConstants.SERVICE_WF_CLIENT);
+
+            //ajouter roles métiers si besoin
+
             return this.extractAuthentication(map);
         }
     }
