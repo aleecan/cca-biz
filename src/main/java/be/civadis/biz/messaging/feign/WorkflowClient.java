@@ -29,7 +29,7 @@ public interface WorkflowClient {
      * @return
      */
     @PostMapping(value = "/processes/{processName}/start")
-    public ResponseEntity<ProcessInstanceDTO> startProcess(@PathVariable String processName, @RequestParam(value="businessKey", required = false) String businessKey, @RequestBody Map<String, Object> variables);
+    public ResponseEntity<ProcessInstanceDTO> startProcess(@PathVariable(value="processName") String processName, @RequestParam(value="businessKey", required = false) String businessKey, @RequestBody Map<String, Object> variables);
 
     /**
      * Recherche la liste des tasks pouvant être traitées à un user selon ses groupes,
