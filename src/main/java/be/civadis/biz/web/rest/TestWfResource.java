@@ -30,7 +30,7 @@ public class TestWfResource {
         this.workflowClient = workflowClient;
     }
 
-    @GetMapping("/hellowf/{tenant}")
+    @GetMapping("/hellowf")
     @Timed
     public ResponseEntity<Boolean> hello() {
         return workflowClient.hello();
