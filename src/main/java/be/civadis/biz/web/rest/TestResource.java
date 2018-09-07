@@ -34,12 +34,5 @@ public class TestResource {
         return ResponseEntity.ok(this.articleQueryService.findAll());
     }
 
-    @GetMapping("/init")
-    @Timed
-    public ResponseEntity<Boolean> init() throws Exception {
-        this.articleQueryService.prepareStore();
-        return ResponseEntity.ok(true);
-    }
-
 
 }
