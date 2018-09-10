@@ -13,8 +13,8 @@ import java.util.Map;
 @AuthorizedFeignClient(name = "WF", path="/workflow")
 public interface WorkflowClient {
 
-    //pour la secu, on devrait empecher l'appel direct par le gateway, ou utiliser role propre à l'applciation bonCommande, filtre sur origine de l'appel, ... ?
-    //->le service ajoute AuthoritiesConstants.SERVICE_WF_CLIENT dans les roles du token
+    //pour la secu, on devrait empecher l'appel direct par le gateway
+    //-> config du server zuul du gateway
 
     //TODO:transmission des pageable ne marche pas en spring cloud
 
