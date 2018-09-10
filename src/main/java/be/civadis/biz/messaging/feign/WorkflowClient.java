@@ -4,6 +4,8 @@ import be.civadis.biz.client.AuthorizedFeignClient;
 import be.civadis.biz.messaging.dto.ProcessInstanceDTO;
 import be.civadis.biz.messaging.dto.TaskDTO;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +19,6 @@ public interface WorkflowClient {
     //-> config du server zuul du gateway
 
     //TODO:transmission des pageable ne marche pas en spring cloud
-
-    @GetMapping(value = "/hello")
-    public ResponseEntity<Boolean> hello();
 
     /**
      * Start un process workflow
@@ -136,5 +135,11 @@ public interface WorkflowClient {
      */
     @PostMapping(value = "/my-tasks/{taskId}/complete")
     public ResponseEntity<Boolean> myCompleteTask(@PathVariable("taskId") String taskId, @RequestBody Map<String, Object> params);
+
+
+    // pour test
+
+    @GetMapping(value = "/hello")
+    public ResponseEntity<Boolean> hello();
 
 }
