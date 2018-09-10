@@ -95,21 +95,6 @@ public class CustomServiceUserInfoTokenServices implements ResourceServerTokenSe
             throw new InvalidTokenException(accessToken);
 
         } else {
-
-            //rechercher les roles
-            List roles = null;
-            if (map.containsKey("roles") && map.get("roles") != null){
-                roles = (List) map.get("roles");
-            } else {
-                roles = new ArrayList<String>();
-                map.put("roles", roles);
-            }
-
-            //ajouter le role SERVICE_WF_CLIENT
-            roles.add(AuthoritiesConstants.SERVICE_WF_CLIENT);
-
-            //ajouter roles métiers si besoin
-
             return this.extractAuthentication(map);
         }
     }
