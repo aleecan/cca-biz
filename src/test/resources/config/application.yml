@@ -118,3 +118,7 @@ jhipster:
 application:
     schemas:
         - public
+    topic-config:
+        article: article
+        bon-commande-created: bc_created
+        bon-commande-validated: bc_validated
