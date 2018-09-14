@@ -17,9 +17,19 @@ public class ApplicationProperties {
     private TopicConfig topicConfig = new TopicConfig();
 
     public class TopicConfig{
+
+        private boolean enabled = true;
         private String article;
         private String bonCommandeCreated;
         private String bonCommandeValidated;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
 
         public String getArticle() {
             return article;
