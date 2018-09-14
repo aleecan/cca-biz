@@ -69,7 +69,7 @@ public class MultitenantConfigDatabase {
         }
 
         multiTenantSpringLiquibase.setSchemas(schemas);
-        multiTenantSpringLiquibase.setChangeLog("classpath:config/liquibase/mt_master.xml");
+        multiTenantSpringLiquibase.setChangeLog("classpath:config/liquibase/master.xml");
         multiTenantSpringLiquibase.setContexts("development, production");
         if (env.acceptsProfiles(JHipsterConstants.SPRING_PROFILE_NO_LIQUIBASE)) {
             multiTenantSpringLiquibase.setShouldRun(false);
